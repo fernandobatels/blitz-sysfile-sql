@@ -10,8 +10,12 @@
 #define __interpreter_h__
 
 #include <string>
+#include <vector>
+#include "result-data-group.h"
+#include "result-status.h"
 
 using namespace std;
+using namespace blitzsql::result;
 
 namespace blitzsql {
 
@@ -20,6 +24,11 @@ namespace blitzsql {
         class Interpreter {
             private:
                 string sql;
+                vector<string> cols; 
+                string folder;
+                bool isSelect;
+                DataGroup *dataGroupResult;
+                Status *statusResult;
             public: 
                 /**
                  * Input sql to interpreter
@@ -33,7 +42,14 @@ namespace blitzsql {
                  * Run sql
                  */
                 void run();
-
+                /**
+                 * Get status result
+                 */
+                Status* getResultStatus();
+                /**
+                 * Get data group result
+                 */
+                DataGroup* getResultDataGroup();
                 
         };
 
