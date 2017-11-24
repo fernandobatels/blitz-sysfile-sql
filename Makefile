@@ -1,4 +1,4 @@
-LIBS_FLAGS = 
+LIBS_FLAGS = -lUnitTest++
 
 build:
 	

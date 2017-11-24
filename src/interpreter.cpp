@@ -16,6 +16,7 @@
 #include "result-status.h"
 #include <algorithm>
 #include <fstream>
+#include <UnitTest++/UnitTest++.h>
 
 using namespace std;
 using namespace blitzsql::statement;
@@ -101,4 +102,20 @@ Status* Interpreter::getResultStatus()
 DataGroup* Interpreter::getResultDataGroup()
 {
     return this->dataGroupResult;
+}
+
+
+
+TEST(Interpreter)
+{
+
+    Interpreter interpreter;
+
+    interpreter.input("select name,size from /tmp");
+    interpreter.prepare();
+    interpreter.run();
+
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
+
 }

@@ -8,6 +8,7 @@
 
 #include "result-status.h"
 #include <string>
+#include <UnitTest++/UnitTest++.h>
 
 using namespace std;
 using namespace blitzsql::result;
@@ -27,4 +28,17 @@ string Status::getMessage()
 {
     return this->message;
 }
+
+TEST(Status)
+{
+
+ 
+    blitzsql::result::Status st = blitzsql::result::Status(true, "Test message");
+
+    CHECK_EQUAL(true, st.isSuccess());
+    CHECK_EQUAL("Test message", st.getMessage());
+
+
+}
+
 
