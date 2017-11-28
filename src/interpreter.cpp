@@ -17,9 +17,10 @@
 #include <algorithm>
 #include <fstream>
 #include <UnitTest++/UnitTest++.h>
-#include <boost/algorithm/string/find.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 using namespace std;
 using namespace blitzsql::statement;
@@ -37,12 +38,34 @@ bool Interpreter::prepare()
     this->isSelect = false;
     this->cols = {};
     this->folder = "";
+    this->limitRows = -1;
 
     trim(this->sql);
 
-    if ((ifind_first(this->sql, "select").begin() - this->sql.begin()) == 0) {
+    /**
+     * If start with 'select' is a select :)
+     */
+    if (istarts_with(this->sql, "select ")) {
         
         this->isSelect = true;
+        
+        /**
+         * Limit of data
+         */
+        if (icontains(this->sql, " first ")) {
+            vector<string> first;
+            
+            split(first, this->sql, is_any_of(" "));
+
+            if (first.size() < 3)
+                return false;
+
+            this->limitRows = stoi(first[2]);
+        
+            ireplace_all(this->sql, " first " + first[2], "");
+
+            first.clear();
+        }
 
         /**
          * Cols/data we look for
@@ -65,7 +88,6 @@ bool Interpreter::prepare()
 
         if (this->folder == "") 
             return false;
-
 
         if ((this->folder.find_last_of("/") + 1) != this->folder.size()) {
             this->folder += "/";
@@ -92,7 +114,7 @@ bool Interpreter::run()
 
             bool useName = find(this->cols.begin(), this->cols.end(), "name") != this->cols.end();
             bool useSize = find(this->cols.begin(), this->cols.end(), "size") != this->cols.end();
-
+            int numRow = 1;
 
             while ((f = readdir(dir)) != NULL) {
 
@@ -106,7 +128,13 @@ bool Interpreter::run()
                     tmp->put("size", to_string(in.tellg()));
                     in.close();
                 } 
+
                 this->dataGroupResult->add(tmp);
+
+                if (numRow == this->limitRows and this->limitRows > 0)
+                    break;
+
+                numRow++;
             }
             
             closedir(dir);
@@ -119,7 +147,6 @@ bool Interpreter::run()
     return false;
 }
 
-
 Status* Interpreter::getResultStatus() 
 {
     return this->statusResult;
@@ -130,7 +157,10 @@ DataGroup* Interpreter::getResultDataGroup()
     return this->dataGroupResult;
 }
 
-TEST(Interpreter)
+
+
+
+TEST(InterpreterSimpleSelect)
 {
     Interpreter interpreter;
 
@@ -154,5 +184,21 @@ TEST(Interpreter)
 
     CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
     CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
+}
+
+
+TEST(InterpreterLimitRowsSelect)
+{
+    Interpreter interpreter;
+
+    /**
+     * Limit results
+     */
+    interpreter.input("select first 2 name from '/tmp'");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+
+    CHECK(interpreter.getResultDataGroup()->getResult().size() == 2);
+
 
 }

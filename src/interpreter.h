@@ -27,6 +27,7 @@ namespace blitzsql {
                 vector<string> cols; 
                 string folder;
                 bool isSelect;
+                int limitRows;
                 DataGroup *dataGroupResult;
                 Status *statusResult;
             public: 
