@@ -17,19 +17,30 @@
 #include <algorithm>
 #include <fstream>
 #include <UnitTest++/UnitTest++.h>
+#include <boost/algorithm/string/find.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 using namespace std;
 using namespace blitzsql::statement;
 using namespace blitzsql::result;
+using namespace boost::algorithm;
 
 void Interpreter::input(string sql)
 {
     this->sql = sql;
 }
 
-void Interpreter::prepare()
+bool Interpreter::prepare()
 {
-    if (this->sql.find("select") == 0) {
+    //Reset all atributes
+    this->isSelect = false;
+    this->cols = {};
+    this->folder = "";
+
+    trim(this->sql);
+
+    if ((ifind_first(this->sql, "select").begin() - this->sql.begin()) == 0) {
         
         this->isSelect = true;
 
@@ -38,22 +49,35 @@ void Interpreter::prepare()
          */
         stringstream ss(this->sql.substr(7, this->sql.find(" from ") - 7));
         string item;
-        this->cols = {};
     
         while (getline(ss, item, ',')) {
+            trim(item);
             this->cols.push_back(item);
         }
 
+        if (this->cols.size() == 0) 
+            return false;
+
         // The table/folder
         this->folder = this->sql.substr(this->sql.find(" from ") + 6);
-    
+
+        replace_all(this->folder, "'", "");
+
+        if (this->folder == "") 
+            return false;
+
+
         if ((this->folder.find_last_of("/") + 1) != this->folder.size()) {
             this->folder += "/";
         }
+
+        return true;
     }
+
+    return false;
 }
 
-void Interpreter::run()
+bool Interpreter::run()
 {
     if (this->isSelect) {
 
@@ -70,7 +94,7 @@ void Interpreter::run()
             bool useSize = find(this->cols.begin(), this->cols.end(), "size") != this->cols.end();
 
 
-            while (f = readdir(dir)) {
+            while ((f = readdir(dir)) != NULL) {
 
                 Data* tmp = new Data();
 
@@ -84,13 +108,15 @@ void Interpreter::run()
                 } 
                 this->dataGroupResult->add(tmp);
             }
-
+            
+            closedir(dir);
+            return true;
         }
 
         closedir(dir);
     }
 
-
+    return false;
 }
 
 
@@ -104,16 +130,27 @@ DataGroup* Interpreter::getResultDataGroup()
     return this->dataGroupResult;
 }
 
-
-
 TEST(Interpreter)
 {
-
     Interpreter interpreter;
 
     interpreter.input("select name,size from /tmp");
-    interpreter.prepare();
-    interpreter.run();
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
+
+    interpreter.input("SELECT name, size from /tmp");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
+    
+    interpreter.input(" select name,  size from '/tmp'");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
 
     CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
     CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());

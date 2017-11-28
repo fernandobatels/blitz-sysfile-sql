@@ -37,11 +37,11 @@ namespace blitzsql {
                 /**
                  * Prepare the sql
                  */
-                void prepare();
+                bool prepare();
                 /**
                  * Run sql
                  */
-                void run();
+                bool run();
                 /**
                  * Get status result
                  */
