@@ -13,6 +13,7 @@
 #include <vector>
 #include "result-data-group.h"
 #include "result-status.h"
+#include "interpreter-condition.h"
 
 using namespace std;
 using namespace blitzsql::result;
@@ -30,6 +31,7 @@ namespace blitzsql {
                 int limitRows;
                 DataGroup *dataGroupResult;
                 Status *statusResult;
+                vector<Condition*> whereConditions;
             public: 
                 /**
                  * Input sql to interpreter

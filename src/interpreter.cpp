@@ -21,6 +21,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/find.hpp>
 
 using namespace std;
 using namespace blitzsql::statement;
@@ -39,6 +40,7 @@ bool Interpreter::prepare()
     this->cols = {};
     this->folder = "";
     this->limitRows = -1;
+    this->whereConditions = {};
 
     trim(this->sql);
 
@@ -81,6 +83,27 @@ bool Interpreter::prepare()
         if (this->cols.size() == 0) 
             return false;
 
+        //Where
+        if (icontains(this->sql, " where ")) {
+            
+            string where = this->sql.substr(ifind_first(this->sql, " where ").begin() - this->sql.begin() + 7);
+            
+            //In the moment only work with one condition :(
+            
+            string colW = where.substr(0, where.find("="));
+            replace_all(colW, "'", "");
+            trim(colW);
+
+            string valW = where.substr(where.find("=") + 1);
+            replace_all(valW, "'", "");
+            trim(valW);
+
+            this->whereConditions.push_back(new Condition(colW, valW));
+
+            ireplace_all(this->sql, " where " + where, "");
+
+        }
+
         // The table/folder
         this->folder = this->sql.substr(this->sql.find(" from ") + 6);
 
@@ -114,6 +137,7 @@ bool Interpreter::run()
 
             bool useName = find(this->cols.begin(), this->cols.end(), "name") != this->cols.end();
             bool useSize = find(this->cols.begin(), this->cols.end(), "size") != this->cols.end();
+            bool withWhere = this->whereConditions.size() > 0;
             int numRow = 1;
 
             while ((f = readdir(dir)) != NULL) {
@@ -128,6 +152,20 @@ bool Interpreter::run()
                     tmp->put("size", to_string(in.tellg()));
                     in.close();
                 } 
+
+                if (withWhere) {
+                    bool canContinue = false;
+                    
+                    for (Condition *condition : this->whereConditions) {
+                        if (!condition->check(tmp->get(condition->getCol()))) {
+                            canContinue = true;
+                            break;
+                        }
+                    }
+
+                    if (canContinue)
+                        continue;
+                }
 
                 this->dataGroupResult->add(tmp);
 
@@ -159,7 +197,9 @@ DataGroup* Interpreter::getResultDataGroup()
 
 
 
-
+/**
+ * Simple selects
+ */
 TEST(InterpreterSimpleSelect)
 {
     Interpreter interpreter;
@@ -186,19 +226,31 @@ TEST(InterpreterSimpleSelect)
     CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
 }
 
-
+/**
+ * Select with limit rows
+ */
 TEST(InterpreterLimitRowsSelect)
 {
     Interpreter interpreter;
 
-    /**
-     * Limit results
-     */
     interpreter.input("select first 2 name from '/tmp'");
     CHECK(interpreter.prepare());
     CHECK(interpreter.run());
 
     CHECK(interpreter.getResultDataGroup()->getResult().size() == 2);
+}
 
+/**
+ * Select with where
+ */
+TEST(InterpreterWhereSelect)
+{
+    Interpreter interpreter;
 
+    interpreter.input("select name, size from '/tmp' where name = 'test.txt'");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+
+    CHECK(interpreter.getResultDataGroup()->getResult().size() == 1);
+    CHECK(interpreter.getResultDataGroup()->getResult()[0]->get("size") == "4");
 }
