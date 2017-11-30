@@ -133,7 +133,7 @@ bool Interpreter::run()
     
         if (dir != NULL) {
             
-            this->dataGroupResult = new DataGroup();
+            this->dataGroupResult = new DataGroup(this->cols);
 
             bool useName = find(this->cols.begin(), this->cols.end(), "name") != this->cols.end();
             bool useSize = find(this->cols.begin(), this->cols.end(), "size") != this->cols.end();
@@ -141,6 +141,9 @@ bool Interpreter::run()
             int numRow = 1;
 
             while ((f = readdir(dir)) != NULL) {
+                
+                if (strcmp(f->d_name, ".") == 0|| strcmp(f->d_name, "..") == 0) 
+                    continue;
 
                 Data* tmp = new Data();
 

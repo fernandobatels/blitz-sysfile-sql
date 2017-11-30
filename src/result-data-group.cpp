@@ -15,14 +15,20 @@
 using namespace std;
 using namespace blitzsql::result;
 
-DataGroup::DataGroup()
+DataGroup::DataGroup(vector<string> colsNames)
 {
     this->results = {};
+    this->colsNames = colsNames;
 }
 
 void DataGroup::add(Data* data)
 {
     this->results.push_back(data);
+}
+
+vector<string> DataGroup::getColsNames()
+{
+    return this->colsNames;
 }
 
 vector<Data*> DataGroup::getResult()
@@ -32,8 +38,7 @@ vector<Data*> DataGroup::getResult()
 
 TEST(DataGroup)
 {
-
-    DataGroup fis = DataGroup();
+    DataGroup fis = DataGroup({"name", "content"});
    
     Data fiTmp = Data();
     fiTmp.put("name", "test.txt");

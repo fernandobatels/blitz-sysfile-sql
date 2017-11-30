@@ -7,6 +7,7 @@ build:
 	g++ -c ./src/result-data.cpp -o ./dist/result-data.o $(LIBS_FLAGS)
 	g++ -c ./src/interpreter.cpp -o ./dist/interpreter.o $(LIBS_FLAGS)
 	g++ -c ./src/interpreter-condition.cpp -o ./dist/interpreter-condition.o $(LIBS_FLAGS)
+	g++ -c ./src/run.cpp -o ./dist/run.o $(LIBS_FLAGS)
 	g++ -c ./src/main.cpp -o ./dist/main.o $(LIBS_FLAGS)
 	
 	ld -r ./dist/*.o -o ./dist/tmp.o

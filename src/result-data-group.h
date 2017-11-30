@@ -22,8 +22,9 @@ namespace blitzsql {
         class DataGroup {
             private:
                 vector<Data*> results;
+                vector<string> colsNames;
             public: 
-                DataGroup();
+                DataGroup(vector<string> colsNames);
                 /**
                  * Add new data do result
                  */
@@ -32,7 +33,10 @@ namespace blitzsql {
                  * Get data resulteds
                  */
                 vector<Data*> getResult();
-
+                /**
+                 * Get collumns names
+                 */
+                vector<string> getColsNames();
         };
 
     };
