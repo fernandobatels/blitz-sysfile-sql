@@ -3,6 +3,10 @@ Blitz SysFile SQL
 
 Interface sql para manipulação de diretórios do sistema de arquivos do SO.
 
+Atualmente a aplicação permite usar comandos sql por meio do parâmetro '-r'. Exemplos:
+
+![Exemplo](https://github.com/FernandoBatels/blitz-sysfile-sql/blob/master/demonstracao.gif)
+
 Com um 'select name, size from Downloads' será possível listar os arquivos da pasta Downloads, por exemplo.
 
 A ideia é se manter dentro dos padrões do SQL, porém com a devida liberdade para criar novos conceitos e funcionalidades.
