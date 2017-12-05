@@ -14,6 +14,7 @@
 #include "result-data-group.h"
 #include "result-status.h"
 #include "interpreter-condition.h"
+#include "interpreter-command.h"
 
 using namespace std;
 using namespace blitzsql::result;
@@ -25,13 +26,8 @@ namespace blitzsql {
         class Interpreter {
             private:
                 string sql;
-                vector<string> cols; 
-                string folder;
                 bool isSelect;
-                int limitRows;
-                DataGroup *dataGroupResult;
-                Status *statusResult;
-                vector<Condition*> whereConditions;
+                BaseCommand* command;
             public: 
                 /**
                  * Input sql to interpreter

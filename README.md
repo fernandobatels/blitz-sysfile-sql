@@ -17,7 +17,7 @@ Será provido uma interface ODBC(https://pt.wikipedia.org/wiki/ODBC), para que a
 
 **Objetivos**
 
-- [ ] Listagem de arquivos, algo como 'selec name, size from Downloads';
+- [x] Listagem de arquivos, algo como 'selec name, size from Downloads';
 - [ ] Criação de arquivos, algo como 'insert into Downloads(name, content) value ("test.txt", "Content!")'
 - [ ] Edição de arquivos, algo como 'update Downloads set content = "New content!" where name = "test.txt"'
 - [ ] Exclusão de arquivos, algo como 'delete from Downloads where name = "test.txt"'
