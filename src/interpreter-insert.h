@@ -1,0 +1,37 @@
+/**
+* Blitz SysFile SQL
+*
+* Class to run insert
+*
+* @author Fernando Batels <luisfbatels@gmail.com>
+*/
+
+#ifndef __interpreter_insert_h__
+#define __interpreter_insert_h__
+
+#include <string>
+#include <vector>
+#include "result-status.h"
+#include "interpreter-command.h"
+
+using namespace std;
+
+namespace blitzsql {
+
+    namespace statement {
+
+        class Insert: public BaseCommand {
+            private:
+                vector<string> cols; 
+                vector<string> vals; 
+                string folder;
+            public:
+                Insert();
+                bool prepare();
+                bool execute();
+        };
+
+    };
+};
+
+#endif

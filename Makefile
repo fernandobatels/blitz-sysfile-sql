@@ -9,6 +9,7 @@ build:
 	g++ -c ./src/interpreter-condition.cpp -o ./dist/interpreter-condition.o $(LIBS_FLAGS)
 	g++ -c ./src/interpreter-command.cpp -o ./dist/interpreter-command.o $(LIBS_FLAGS)
 	g++ -c ./src/interpreter-select.cpp -o ./dist/interpreter-select.o $(LIBS_FLAGS)
+	g++ -c ./src/interpreter-insert.cpp -o ./dist/interpreter-insert.o $(LIBS_FLAGS)
 	g++ -c ./src/run.cpp -o ./dist/run.o $(LIBS_FLAGS)
 	g++ -c ./src/main.cpp -o ./dist/main.o $(LIBS_FLAGS)
 	
@@ -20,3 +21,6 @@ build:
 
 	#Used on tests:
 	echo 123 > /tmp/test.txt
+	echo 123 > /tmp/test-insert.txt
+	rm /tmp/test-insert.txt
+	

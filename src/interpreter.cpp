@@ -9,6 +9,7 @@
 #include "interpreter.h"
 #include "interpreter-command.h"
 #include "interpreter-select.h"
+#include "interpreter-insert.h"
 #include <string>
 #include <iostream>
 #include "result-data-group.h"
@@ -42,13 +43,16 @@ bool Interpreter::prepare()
         this->isSelect = true;
 
         this->command = new Select();
-        this->command->setSql(this->sql);
-
-        return this->command->prepare();
+    
+    } else if (istarts_with(this->sql, "insert ")) {
+        
+        this->command = new Insert();
 
     }
+    
+    this->command->setSql(this->sql);
 
-    return false;
+    return this->command->prepare();
 }
 
 bool Interpreter::run()
@@ -128,4 +132,18 @@ TEST(InterpreterWhereSelect)
 
     CHECK(interpreter.getResultDataGroup()->getResult().size() == 1);
     CHECK(interpreter.getResultDataGroup()->getResult()[0]->get("size") == "4");
+}
+
+/**
+ * Insert without content
+ */
+TEST(InterpreterInsertWithoutContent)
+{
+    Interpreter interpreter;
+
+    interpreter.input("insert into '/tmp'(name) values ('test-insert.txt')");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+
+    CHECK(interpreter.getResultStatus()->isSuccess());
 }

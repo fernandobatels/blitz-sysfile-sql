@@ -17,7 +17,6 @@
 #include "result-data.h"
 #include <algorithm>
 #include <fstream>
-#include <UnitTest++/UnitTest++.h>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/predicate.hpp>
