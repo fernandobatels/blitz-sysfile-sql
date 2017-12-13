@@ -7,12 +7,14 @@
  */
 
 #include "interpreter-insert.h"
+#include "interpreter.h"
 #include "result-status.h"
 #include "interpreter-command.h"
 #include <string>
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <UnitTest++/UnitTest++.h>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/find.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -36,6 +38,7 @@ bool Insert::prepare()
     int lineIndex = 0;
     bool withCols = false;
     int lineIndexColName = -1;
+    int lineIndexColContent = -1;
     
 
     while (getline(ss, item, ',')) {
@@ -43,13 +46,16 @@ bool Insert::prepare()
 
         if (item == "name")
             lineIndexColName = lineIndex;
+
+        if (item == "content")
+            lineIndexColContent = lineIndex;
                     
         withCols = true;
         lineIndex += 1;
     }
 
     if (!withCols) { 
-        this->setStatus(new Status(false, "no columns detecteds!"));
+        this->setStatus(new Status(false, "No columns detecteds!"));
         return false;
     }
 
@@ -69,7 +75,10 @@ bool Insert::prepare()
         trim(item);
 
         if (lineIndex == lineIndexColName)
-            this->valName = item;
+            this->name = item;
+
+        if (lineIndex == lineIndexColContent)
+            this->content = item;
 
         withVals = true;
         lineIndex += 1;
@@ -112,16 +121,89 @@ bool Insert::execute()
         return false;
     }
  
-    if (exists(this->folder + this->valName)) {
+    if (exists(this->folder + this->name)) {
         this->setStatus(new Status(false, "File exists on destination folder!!"));
         return false;
     }   
 
-    std::fstream newFile(this->folder + this->valName, ios_base::out);
-    newFile << "";
+    std::fstream newFile(this->folder + this->name, ios_base::out);
+    newFile << this->content;
     newFile.close();
 
     this->setStatus(new Status(true, "Insert executed with success"));
 
     return true;
+}
+
+/**
+ * Insert without content
+ */
+TEST(InterpreterInsertWithoutContent)
+{
+    remove("/tmp/test-insert.txt");
+
+    Interpreter interpreter;
+
+    interpreter.input("insert into '/tmp'(name) values ('test-insert.txt')");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+    CHECK(interpreter.getResultStatus()->isSuccess());
+
+    // Duplicated file
+    interpreter.input("insert into '/tmp'(name) values ('test-insert.txt')");
+    CHECK(interpreter.prepare());
+    CHECK(!interpreter.run());
+    CHECK(!interpreter.getResultStatus()->isSuccess());
+
+}
+
+/**
+ * Insert with null content
+ */
+TEST(InterpreterInsertWithNullContent)
+{
+    remove("/tmp/test-insert-null.txt");
+    
+    Interpreter interpreter;
+
+    interpreter.input("insert into '/tmp'(name, content) values ('test-insert-null.txt', null)");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+    CHECK(interpreter.getResultStatus()->isSuccess());
+
+}
+
+/**
+ * Insert with content
+ */
+TEST(InterpreterInsertWithContent)
+{
+    remove("/tmp/test-insert-content.txt");
+    
+    Interpreter interpreter;
+
+    interpreter.input("insert into '/tmp'(name, content) values ('test-insert-content.txt', 'Hello')");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+    CHECK(interpreter.getResultStatus()->isSuccess());
+
+}
+
+
+/**
+ * Insert without valid folder
+ */
+TEST(InterpreterInsertWithoutValidDestinationFolder)
+{
+    Interpreter interpreter;
+
+    interpreter.input("insert into '/tmp/not-exist-folder'(name) values ('test-insert.txt')");
+    CHECK(interpreter.prepare());
+    CHECK(!interpreter.run());
+    CHECK(!interpreter.getResultStatus()->isSuccess());
+
+    interpreter.input("insert into '/tmp/test.txt'(name) values ('test-insert.txt')");
+    CHECK(interpreter.prepare());
+    CHECK(!interpreter.run());
+    CHECK(!interpreter.getResultStatus()->isSuccess());
 }

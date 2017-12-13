@@ -7,6 +7,7 @@
  */
 
 #include "interpreter-select.h"
+#include "interpreter.h"
 #include "result-data-group.h"
 #include "result-status.h"
 #include "interpreter-condition.h"
@@ -22,7 +23,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/find.hpp>
-
+#include <UnitTest++/UnitTest++.h>
 
 using namespace std;
 using namespace blitzsql::statement;
@@ -195,3 +196,66 @@ bool Select::execute()
     this->setStatus(new Status(false, "Problem on open folder"));
     return false;
 }
+
+/**
+ * Simple selects
+ */
+TEST(InterpreterSimpleSelect)
+{
+    Interpreter interpreter;
+
+    interpreter.input("select name,size from /tmp");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
+
+    interpreter.input("SELECT name, size from /tmp");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
+    
+    interpreter.input(" select name,  size from '/tmp'");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
+    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
+}
+
+/**
+ * Select with limit rows
+ */
+TEST(InterpreterLimitRowsSelect)
+{
+    Interpreter interpreter;
+
+    interpreter.input("select first 2 name from '/tmp'");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+
+    CHECK(interpreter.getResultDataGroup()->getResult().size() == 2);
+}
+
+/**
+ * Select with where
+ */
+TEST(InterpreterWhereSelect)
+{
+    std::fstream newFile("/tmp/test.txt", ios_base::out);
+    newFile << "1234";
+    newFile.close();
+
+    Interpreter interpreter;
+
+    interpreter.input("select name, size from '/tmp' where name = 'test.txt'");
+    CHECK(interpreter.prepare());
+    CHECK(interpreter.run());
+
+    CHECK(interpreter.getResultDataGroup()->getResult().size() == 1);
+    CHECK(interpreter.getResultDataGroup()->getResult()[0]->get("size") == "4");
+}
+

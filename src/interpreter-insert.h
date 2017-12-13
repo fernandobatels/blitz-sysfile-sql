@@ -21,7 +21,8 @@ namespace blitzsql {
 
         class Insert: public BaseCommand {
             private:
-                string valName; 
+                string name; 
+                string content; 
                 string folder;
             public:
                 bool prepare();

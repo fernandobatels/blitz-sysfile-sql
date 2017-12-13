@@ -14,7 +14,6 @@
 #include <iostream>
 #include "result-data-group.h"
 #include "result-status.h"
-#include <UnitTest++/UnitTest++.h>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -75,99 +74,3 @@ DataGroup* Interpreter::getResultDataGroup()
 }
 
 
-
-/**
- * Simple selects
- */
-TEST(InterpreterSimpleSelect)
-{
-    Interpreter interpreter;
-
-    interpreter.input("select name,size from /tmp");
-    CHECK(interpreter.prepare());
-    CHECK(interpreter.run());
-
-    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
-    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
-
-    interpreter.input("SELECT name, size from /tmp");
-    CHECK(interpreter.prepare());
-    CHECK(interpreter.run());
-
-    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
-    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
-    
-    interpreter.input(" select name,  size from '/tmp'");
-    CHECK(interpreter.prepare());
-    CHECK(interpreter.run());
-
-    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
-    CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
-}
-
-/**
- * Select with limit rows
- */
-TEST(InterpreterLimitRowsSelect)
-{
-    Interpreter interpreter;
-
-    interpreter.input("select first 2 name from '/tmp'");
-    CHECK(interpreter.prepare());
-    CHECK(interpreter.run());
-
-    CHECK(interpreter.getResultDataGroup()->getResult().size() == 2);
-}
-
-/**
- * Select with where
- */
-TEST(InterpreterWhereSelect)
-{
-    Interpreter interpreter;
-
-    interpreter.input("select name, size from '/tmp' where name = 'test.txt'");
-    CHECK(interpreter.prepare());
-    CHECK(interpreter.run());
-
-    CHECK(interpreter.getResultDataGroup()->getResult().size() == 1);
-    CHECK(interpreter.getResultDataGroup()->getResult()[0]->get("size") == "4");
-}
-
-/**
- * Insert without content
- */
-TEST(InterpreterInsertWithoutContent)
-{
-    Interpreter interpreter;
-
-    interpreter.input("insert into '/tmp'(name) values ('test-insert.txt')");
-    CHECK(interpreter.prepare());
-    CHECK(interpreter.run());
-    CHECK(interpreter.getResultStatus()->isSuccess());
-
-    // Duplicated file
-    interpreter.input("insert into '/tmp'(name) values ('test-insert.txt')");
-    CHECK(interpreter.prepare());
-    CHECK(!interpreter.run());
-    CHECK(!interpreter.getResultStatus()->isSuccess());
-
-}
-
-/**
- * Insert without valid folder
- */
-TEST(InterpreterInsertWithoutValidDestinationFolder)
-{
-    Interpreter interpreter;
-
-    interpreter.input("insert into '/tmp/not-exist-folder'(name) values ('test-insert.txt')");
-    CHECK(interpreter.prepare());
-    CHECK(!interpreter.run());
-    CHECK(!interpreter.getResultStatus()->isSuccess());
-
-    interpreter.input("insert into '/tmp/test.txt'(name) values ('test-insert.txt')");
-    CHECK(interpreter.prepare());
-    CHECK(!interpreter.run());
-    CHECK(!interpreter.getResultStatus()->isSuccess());
-}
