@@ -73,6 +73,7 @@ bool Run::execute(string sql) {
 
     cout << setfill('-') << setw(30 * (colI - 1)) << "" << endl;
     cout << setfill(' ') << "Rows: " << interpreter.getResultDataGroup()->getResult().size() << endl;
+    cout << setfill(' ') << "Status: " << interpreter.getResultStatus()->getMessage() << endl;
 
     return false;
 }

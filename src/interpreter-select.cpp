@@ -56,8 +56,10 @@ bool Select::prepare()
 
         split(first, sql, is_any_of(" "));
 
-        if (first.size() < 3)
+        if (first.size() < 3) {
+            this->setStatus(new Status(false, "No first paramters detecteds!"));
             return false;
+        }
 
         this->limitRows = stoi(first[2]);
     
@@ -77,8 +79,10 @@ bool Select::prepare()
         this->cols.push_back(item);
     }
 
-    if (this->cols.size() == 0) 
+    if (this->cols.size() == 0) { 
+        this->setStatus(new Status(false, "No columns detecteds!"));
         return false;
+    }
 
     //Where
     if (icontains(sql, " where ")) {
@@ -108,14 +112,14 @@ bool Select::prepare()
 
     replace_all(this->folder, "'", "");
 
-    if (this->folder == "") 
+    if (this->folder == "") {
+        this->setStatus(new Status(false, "No folder detecteds!"));
         return false;
+    }
 
     if ((this->folder.find_last_of("/") + 1) != this->folder.size()) {
         this->folder += "/";
     }
-
-    this->setSql(sql);
 
     return true;
 }
@@ -181,11 +185,13 @@ bool Select::execute()
         
         closedir(dir);
     
+        this->setStatus(new Status(false, "Select executed with success!"));
         return true;
 
     }
 
     closedir(dir);
 
+    this->setStatus(new Status(false, "Problem on open folder"));
     return false;
 }

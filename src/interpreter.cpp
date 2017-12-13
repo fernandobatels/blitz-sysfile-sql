@@ -144,6 +144,30 @@ TEST(InterpreterInsertWithoutContent)
     interpreter.input("insert into '/tmp'(name) values ('test-insert.txt')");
     CHECK(interpreter.prepare());
     CHECK(interpreter.run());
-
     CHECK(interpreter.getResultStatus()->isSuccess());
+
+    // Duplicated file
+    interpreter.input("insert into '/tmp'(name) values ('test-insert.txt')");
+    CHECK(interpreter.prepare());
+    CHECK(!interpreter.run());
+    CHECK(!interpreter.getResultStatus()->isSuccess());
+
+}
+
+/**
+ * Insert without valid folder
+ */
+TEST(InterpreterInsertWithoutValidDestinationFolder)
+{
+    Interpreter interpreter;
+
+    interpreter.input("insert into '/tmp/not-exist-folder'(name) values ('test-insert.txt')");
+    CHECK(interpreter.prepare());
+    CHECK(!interpreter.run());
+    CHECK(!interpreter.getResultStatus()->isSuccess());
+
+    interpreter.input("insert into '/tmp/test.txt'(name) values ('test-insert.txt')");
+    CHECK(interpreter.prepare());
+    CHECK(!interpreter.run());
+    CHECK(!interpreter.getResultStatus()->isSuccess());
 }

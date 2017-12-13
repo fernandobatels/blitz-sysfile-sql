@@ -1,4 +1,4 @@
-LIBS_FLAGS = -lUnitTest++ -lboost_system
+LIBS_FLAGS = -lUnitTest++ -lboost_system -lboost_filesystem
 
 build:
 	

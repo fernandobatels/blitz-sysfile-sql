@@ -10,7 +10,6 @@
 #define __interpreter_insert_h__
 
 #include <string>
-#include <vector>
 #include "result-status.h"
 #include "interpreter-command.h"
 
@@ -22,11 +21,9 @@ namespace blitzsql {
 
         class Insert: public BaseCommand {
             private:
-                vector<string> cols; 
-                vector<string> vals; 
+                string valName; 
                 string folder;
             public:
-                Insert();
                 bool prepare();
                 bool execute();
         };
