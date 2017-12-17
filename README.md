@@ -1,24 +1,43 @@
-Blitz SysFile SQL
-==
+# Blitz SysFile SQL
 
-Interface sql para manipulação de diretórios do sistema de arquivos do SO.
+Sql interface to manipulate file and folder of SO.
 
-Atualmente a aplicação permite usar comandos sql por meio do parâmetro '-r'. Exemplos:
+**This project is for study purposes**, but you can use it where you want at your own risk. 
 
-![Exemplo](https://github.com/FernandoBatels/blitz-sysfile-sql/blob/master/demonstracao.gif)
+Contribuite with me on this challenge :), sending me issues or/and pull requests :)
 
-Com um 'select name, size from Downloads' será possível listar os arquivos da pasta Downloads, por exemplo.
+## Concept
 
-A ideia é se manter dentro dos padrões do SQL, porém com a devida liberdade para criar novos conceitos e funcionalidades.
+Folders are equivalent to tables, files are equivalent to rows and infos about files/folders like size, name, content and more are equivalent to columns.
 
-Será provido uma interface ODBC(https://pt.wikipedia.org/wiki/ODBC), para que assim qualquer linguagem possa fazer uso desse servidor.
+This means that you will not be able to create tables with custom columns, for example.
 
-**Aplicação para fins de estudo**
+[DDL](https://en.wikipedia.org/wiki/Data_definition_language) commands will be used to manipulate folders like use 'create table /tmp/test...' to create folder.
 
-**Objetivos**
+[DML](https://en.wikipedia.org/wiki/Data_manipulation_language) commands will be used to manipulate files like use 'insert into /tmp/test.txt(name,content)...' to create new file.
 
-- [x] Listagem de arquivos, algo como 'selec name, size from Downloads';
-- [ ] Criação de arquivos, algo como 'insert into Downloads(name, content) value ("test.txt", "Content!")'
-- [ ] Edição de arquivos, algo como 'update Downloads set content = "New content!" where name = "test.txt"'
-- [ ] Exclusão de arquivos, algo como 'delete from Downloads where name = "test.txt"'
+The biggest challange is to create an [ODBC](https://en.wikipedia.org/wiki/Open_Database_Connectivity) interface/server, so tha any language/framework can make use of.
+
+You need more? Help me to aprimore the conecept and write unit tests :)
+
+## Example:
+
+With select command like 'select name, size from /tmp' you receive the list of files/folders on /tmp.
+
+![Demo](https://github.com/FernandoBatels/blitz-sysfile-sql/blob/master/demonstracao.gif)
+
+**Features**
+
+- [x] List of files/folders
+    - Example: 'selec name, size from Downloads'
+- [x] Create files
+    - Example: 'insert into Downloads(name, content) value ("test.txt", "Content!")'
+- [ ] Update files
+    - Example: 'update Downloads set content = "New content!" where name = "test.txt"'
+- [ ] Remove files
+    - Example: 'delete from Downloads where name = "test.txt"'
 - [ ] Interface ODBC
+- [ ] Create folders
+    - Example: 'create table DownloadsTest'
+- [ ] Remove fodlers
+    - Example: 'drop folder DownloadsTest'
