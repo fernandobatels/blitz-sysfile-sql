@@ -28,7 +28,7 @@ namespace blitzsql {
                 string sql;
                 bool isSelect;
                 BaseCommand* command;
-            public: 
+            public:
                 /**
                  * Input sql to interpreter
                  */
@@ -49,7 +49,11 @@ namespace blitzsql {
                  * Get data group result
                  */
                 DataGroup* getResultDataGroup();
-                
+                /**
+                 * Return if is insert
+                 */
+                bool isCommandSelect();
+
         };
 
     };

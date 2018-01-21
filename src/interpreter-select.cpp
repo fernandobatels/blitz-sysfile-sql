@@ -46,9 +46,9 @@ DataGroup *Select::getData()
 
 bool Select::prepare()
 {
- 
+
     string sql = this->getSql();
-    
+
     /**
      * Limit of data
      */
@@ -63,7 +63,7 @@ bool Select::prepare()
         }
 
         this->limitRows = stoi(first[2]);
-    
+
         ireplace_all(sql, " first " + first[2], "");
 
         first.clear();
@@ -80,18 +80,18 @@ bool Select::prepare()
         this->cols.push_back(item);
     }
 
-    if (this->cols.size() == 0) { 
+    if (this->cols.size() == 0) {
         this->setStatus(new Status(false, "No columns detecteds!"));
         return false;
     }
 
     //Where
     if (icontains(sql, " where ")) {
-        
+
         string where = sql.substr(ifind_first(sql, " where ").begin() - sql.begin() + 7);
-        
+
         //In the moment only work with one condition :(
-        
+
         string colW = where.substr(0, where.find("="));
         replace_all(colW, "'", "");
         trim(colW);
@@ -134,7 +134,7 @@ bool Select::execute()
     dir = opendir(this->folder.c_str());
 
     if (dir != NULL) {
-        
+
         this->dataGroupResult = new DataGroup(this->cols);
 
         bool useName = find(this->cols.begin(), this->cols.end(), "name") != this->cols.end();
@@ -144,32 +144,32 @@ bool Select::execute()
         int numRow = 1;
 
         while ((f = readdir(dir)) != NULL) {
-            
-            if (strcmp(f->d_name, ".") == 0|| strcmp(f->d_name, "..") == 0) 
+
+            if (strcmp(f->d_name, ".") == 0|| strcmp(f->d_name, "..") == 0)
                 continue;
 
             Data* tmp = new Data();
 
-            if (useName) 
+            if (useName)
                 tmp->put("name", f->d_name);
 
             if (useSize) {
                 ifstream in(this->folder + f->d_name, ifstream::binary | ifstream::ate );
                 tmp->put("size", to_string(in.tellg()));
                 in.close();
-            } 
+            }
 
             if (withWhere) {
 
                 bool canContinue = false;
 
                 for (Condition *condition : this->getWhere()) {
-                    
+
                     if (!condition->check(tmp->get(condition->getCol()))) {
                         canContinue = true;
                         break;
                     }
-                
+
                 }
 
                 if (canContinue)
@@ -183,10 +183,10 @@ bool Select::execute()
 
             numRow++;
         }
-        
+
         closedir(dir);
-    
-        this->setStatus(new Status(false, "Select executed with success!"));
+
+        this->setStatus(new Status(true, "Select executed with success!"));
         return true;
 
     }
@@ -217,7 +217,7 @@ TEST(InterpreterSimpleSelect)
 
     CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("name").empty());
     CHECK(!interpreter.getResultDataGroup()->getResult()[0]->get("size").empty());
-    
+
     interpreter.input(" select name,  size from '/tmp'");
     CHECK(interpreter.prepare());
     CHECK(interpreter.run());

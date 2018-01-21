@@ -10,6 +10,7 @@
 #include "interpreter-command.h"
 #include "interpreter-select.h"
 #include "interpreter-insert.h"
+#include "interpreter-delete.h"
 #include <string>
 #include <iostream>
 #include "result-data-group.h"
@@ -38,17 +39,21 @@ bool Interpreter::prepare()
      * If start with 'select' is a select :)
      */
     if (istarts_with(this->sql, "select ")) {
-        
+
         this->isSelect = true;
 
         this->command = new Select();
-    
+
     } else if (istarts_with(this->sql, "insert ")) {
-        
+
         this->command = new Insert();
 
+    } else if (istarts_with(this->sql, "delete ")) {
+
+        this->command = new Delete();
+
     }
-    
+
     this->command->setSql(this->sql);
 
     return this->command->prepare();
@@ -59,7 +64,7 @@ bool Interpreter::run()
     return this->command->execute();
 }
 
-Status* Interpreter::getResultStatus() 
+Status* Interpreter::getResultStatus()
 {
     return this->command->getStatus();
 }
@@ -69,8 +74,11 @@ DataGroup* Interpreter::getResultDataGroup()
     if (this->isSelect) {
         return ((Select*) this->command)->getData();
     }
-    
+
     return {};
 }
 
-
+bool Interpreter::isCommandSelect()
+{
+    return this->isSelect;
+}

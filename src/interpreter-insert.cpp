@@ -28,9 +28,9 @@ using namespace boost::filesystem;
 
 bool Insert::prepare()
 {
-    
+
     string sql = this->getSql();
-  
+
     // Cols
     int posStartCols = sql.find_first_of('(') + 1;
     stringstream ss(sql.substr(posStartCols, sql.find_first_of(')') - posStartCols));
@@ -39,7 +39,7 @@ bool Insert::prepare()
     bool withCols = false;
     int lineIndexColName = -1;
     int lineIndexColContent = -1;
-    
+
 
     while (getline(ss, item, ',')) {
         trim(item);
@@ -49,22 +49,22 @@ bool Insert::prepare()
 
         if (item == "content")
             lineIndexColContent = lineIndex;
-                    
+
         withCols = true;
         lineIndex += 1;
     }
 
-    if (!withCols) { 
+    if (!withCols) {
         this->setStatus(new Status(false, "No columns detecteds!"));
         return false;
     }
 
-    if (lineIndexColName == -1) { 
+    if (lineIndexColName == -1) {
         this->setStatus(new Status(false, "Col name not detected!"));
         return false;
     }
 
-    // Values 
+    // Values
     int posStartVals = sql.find_last_of('(') + 1;
     bool withVals = false;
     ss = stringstream(sql.substr(posStartVals, sql.find_last_of(')') - posStartVals));
@@ -84,7 +84,7 @@ bool Insert::prepare()
         lineIndex += 1;
     }
 
-    if (!withVals) { 
+    if (!withVals) {
         this->setStatus(new Status(false, "No values detecteds!"));
         return false;
     }
@@ -96,7 +96,7 @@ bool Insert::prepare()
 
     replace_all(this->folder, "'", "");
 
-    if (this->folder == "") { 
+    if (this->folder == "") {
         this->setStatus(new Status(false, "No folder detecteds!"));
         return false;
     }
@@ -115,16 +115,16 @@ bool Insert::execute()
         this->setStatus(new Status(false, "Destination folder no exists!"));
         return false;
     }
- 
+
     if (!is_directory(this->folder)) {
         this->setStatus(new Status(false, "Destination folder is a file!"));
         return false;
     }
- 
+
     if (exists(this->folder + this->name)) {
         this->setStatus(new Status(false, "File exists on destination folder!!"));
         return false;
-    }   
+    }
 
     std::fstream newFile(this->folder + this->name, ios_base::out);
     newFile << this->content;
@@ -163,7 +163,7 @@ TEST(InterpreterInsertWithoutContent)
 TEST(InterpreterInsertWithNullContent)
 {
     remove("/tmp/test-insert-null.txt");
-    
+
     Interpreter interpreter;
 
     interpreter.input("insert into '/tmp'(name, content) values ('test-insert-null.txt', null)");
@@ -179,7 +179,7 @@ TEST(InterpreterInsertWithNullContent)
 TEST(InterpreterInsertWithContent)
 {
     remove("/tmp/test-insert-content.txt");
-    
+
     Interpreter interpreter;
 
     interpreter.input("insert into '/tmp'(name, content) values ('test-insert-content.txt', 'Hello')");
